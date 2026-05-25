@@ -13,6 +13,17 @@ export const metadata: Metadata = {
     title: "베프 (VF) - Veteran Friend",
     description: "경험에서 나온 진짜 조언, 베프에서 만나세요.",
   },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  manifest: "/manifest.webmanifest",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "베프",
+  },
 };
 
 export default async function RootLayout({
