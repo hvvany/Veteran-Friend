@@ -103,8 +103,9 @@ export async function getPostById(id: string) {
   });
 
   if (post) {
-    // 조회수 증가
+    // 조회수 증가 (표시값도 정확하게 반영)
     await prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } });
+    post.viewCount += 1;
   }
 
   return post;

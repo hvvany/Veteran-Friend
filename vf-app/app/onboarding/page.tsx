@@ -15,8 +15,8 @@ export default function OnboardingPage() {
   const [isPending, startTransition] = useTransition();
 
   // 소셜 계정 정보에서 기본 닉네임 추출
-  const defaultNickname = session?.user?.nickname ?? 
-    (session?.user?.name ?? "").replace(/\s+/g, "").slice(0, 10) || "";
+  const defaultNickname = (session?.user?.nickname ??
+    (session?.user?.name ?? "").replace(/\s+/g, "").slice(0, 10)) || "";
 
   function handleRoleSelect(role: "JUNIOR" | "VETERAN") {
     setSelectedRole(role);
@@ -72,7 +72,7 @@ export default function OnboardingPage() {
                 <img
                   src={session.user.image}
                   alt=""
-                  className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-blue-100"
+                  className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-primary-100"
                 />
               )}
               <h1 className="text-2xl font-black text-gray-900">
@@ -83,7 +83,7 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => handleRoleSelect("JUNIOR")}
-                className="border-2 border-blue-200 hover:border-blue-500 rounded-2xl p-5 text-center transition-all hover:bg-blue-50"
+                className="border-2 border-primary-200 hover:border-primary-600 rounded-2xl p-5 text-center transition-all hover:bg-primary-50"
               >
                 <div className="text-4xl mb-2">🌱</div>
                 <p className="font-bold text-gray-900">주니어</p>
@@ -203,138 +203,6 @@ export default function OnboardingPage() {
                 className="w-full text-sm text-gray-400 hover:text-gray-600"
               >
                 나중에 인증하기
-              </button>
-            </form>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-type Step = "role" | "nickname" | "veteran-verify" | "done";
-
-export default function OnboardingPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("role");
-  const [selectedRole, setSelectedRole] = useState<"JUNIOR" | "VETERAN">("JUNIOR");
-  const [isPending, startTransition] = useTransition();
-
-  function handleRoleSelect(role: "JUNIOR" | "VETERAN") {
-    setSelectedRole(role);
-    setStep("nickname");
-  }
-
-  function handleNicknameSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const nickname = (e.currentTarget.elements.namedItem("nickname") as HTMLInputElement).value;
-
-    startTransition(async () => {
-      try {
-        await setUserRole(selectedRole);
-        await updateProfile({ nickname });
-        if (selectedRole === "VETERAN") {
-          setStep("veteran-verify");
-        } else {
-          router.push("/");
-        }
-      } catch (err) {
-        alert((err as Error).message);
-      }
-    });
-  }
-
-  function handleVeteranVerify(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-    const birthDate = (form.elements.namedItem("birthDate") as HTMLInputElement).value;
-    const totalYears = Number((form.elements.namedItem("totalYears") as HTMLInputElement).value);
-
-    startTransition(async () => {
-      try {
-        await applyVeteranVerification({ name, birthDate, totalYears });
-        router.push("/");
-      } catch (err) {
-        alert((err as Error).message);
-      }
-    });
-  }
-
-  return (
-    <div className="min-h-[70vh] flex items-center justify-center">
-      <div className="card max-w-md w-full space-y-6">
-
-        {/* Step 1: 역할 선택 */}
-        {step === "role" && (
-          <>
-            <div className="text-center">
-              <h1 className="text-2xl font-black text-gray-900">반가워요! 👋</h1>
-              <p className="text-gray-500 text-sm mt-2">어떤 역할로 베프를 이용하실 건가요?</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => handleRoleSelect("JUNIOR")}
-                className="border-2 border-blue-200 hover:border-blue-500 rounded-2xl p-5 text-center transition-all"
-              >
-                <div className="text-4xl mb-2">🌱</div>
-                <p className="font-bold text-gray-900">주니어</p>
-                <p className="text-xs text-gray-500 mt-1">조언이 필요한 2030</p>
-              </button>
-              <button
-                onClick={() => handleRoleSelect("VETERAN")}
-                className="border-2 border-amber-200 hover:border-amber-500 rounded-2xl p-5 text-center transition-all"
-              >
-                <div className="text-4xl mb-2">🏅</div>
-                <p className="font-bold text-gray-900">베테랑</p>
-                <p className="text-xs text-gray-500 mt-1">경험을 나누는 5060</p>
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Step 2: 닉네임 설정 */}
-        {step === "nickname" && (
-          <>
-            <div className="text-center">
-              <div className="text-4xl mb-2">{selectedRole === "VETERAN" ? "🏅" : "🌱"}</div>
-              <h1 className="text-xl font-black text-gray-900">닉네임을 정해주세요</h1>
-              <p className="text-gray-500 text-sm mt-1">나중에 변경 가능해요</p>
-            </div>
-            <form onSubmit={handleNicknameSubmit} className="space-y-3">
-              <input
-                name="nickname"
-                required
-                maxLength={15}
-                minLength={2}
-                placeholder="닉네임 (2~15자)"
-                className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button type="submit" disabled={isPending} className="btn-primary w-full py-3">
-                {isPending ? "설정 중..." : "다음 →"}
-              </button>
-            </form>
-          </>
-        )}
-
-        {/* Step 3: 베테랑 경력 인증 (선택) */}
-        {step === "veteran-verify" && (
-          <>
-            <div className="text-center">
-              <div className="text-4xl mb-2">🛡️</div>
-              <h1 className="text-xl font-black text-gray-900">경력 인증하기</h1>
-              <p className="text-gray-500 text-sm mt-1">건강보험 자격득실확인서 기반으로 인증해요</p>
-            </div>
-            <form onSubmit={handleVeteranVerify} className="space-y-3">
-              <input name="name" required placeholder="이름" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <input name="birthDate" required type="date" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <input name="totalYears" required type="number" min={1} max={50} placeholder="총 경력 연수" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <p className="text-xs text-gray-400">* MVP 단계에서는 직접 입력, 실서비스에서 NHI API 연동 예정</p>
-              <button type="submit" disabled={isPending} className="btn-primary w-full py-3">
-                {isPending ? "인증 중..." : "인증 완료 →"}
-              </button>
-              <button type="button" onClick={() => router.push("/")} className="w-full text-sm text-gray-400 hover:text-gray-600">
-                나중에 하기
               </button>
             </form>
           </>

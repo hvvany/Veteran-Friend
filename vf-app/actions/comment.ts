@@ -56,6 +56,17 @@ export async function toggleRespect(commentId: string) {
   }
 }
 
+export async function getUserRespectedCommentIds(commentIds: string[]): Promise<string[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || commentIds.length === 0) return [];
+
+  const respects = await prisma.respect.findMany({
+    where: { userId: session.user.id, commentId: { in: commentIds } },
+    select: { commentId: true },
+  });
+  return respects.map((r) => r.commentId);
+}
+
 export async function getHallOfFame() {
   return prisma.comment.findMany({
     where: { respects: { gte: 10 }, isAI: false },

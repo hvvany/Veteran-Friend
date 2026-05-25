@@ -17,14 +17,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div>
       {/* 히어로 배너 */}
-      <div className="bg-gradient-to-r from-blue-800 to-blue-600 rounded-2xl p-6 mb-6 text-white">
+      <div className="bg-gradient-to-r from-primary-700 to-primary-600 rounded-2xl p-6 mb-6 text-white">
         <h1 className="text-2xl font-bold mb-1">짬에서 나오는 바이브 ✨</h1>
-        <p className="text-blue-100 text-sm">
+        <p className="text-primary-100 text-sm">
           5060 베테랑의 진짜 경험에서 나온 조언을 만나보세요
         </p>
         <Link
           href="/post/new"
-          className="mt-4 inline-block bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-blue-50 transition-colors"
+          className="mt-4 inline-block bg-white text-primary-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-primary-50 transition-colors"
         >
           고민 털어놓기 →
         </Link>
@@ -54,7 +54,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               href={`/?page=${p}${category ? `&category=${category}` : ""}`}
               className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                 p === page
-                  ? "bg-blue-700 text-white"
+                  ? "bg-primary-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-100 border"
               }`}
             >

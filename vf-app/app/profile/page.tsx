@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getUserProfile } from "@/actions/user";
 import ProfileClient from "@/components/profile/ProfileClient";
 import JjamCard from "@/components/veteran/JjamCard";
@@ -65,9 +66,9 @@ export default async function ProfilePage() {
           <p className="text-sm text-amber-700 mb-3">
             건강보험 자격득실확인서로 경력을 검증하면 베테랑 배지를 받을 수 있어요.
           </p>
-          <a href="/onboarding/veteran" className="btn-primary inline-block text-sm">
+          <Link href="/onboarding/veteran" className="btn-primary inline-block text-sm">
             베테랑 인증 시작 →
-          </a>
+          </Link>
         </div>
       )}
     </div>

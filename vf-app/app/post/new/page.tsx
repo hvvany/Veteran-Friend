@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { createPost } from "@/actions/post";
 
 const CATEGORIES = [
@@ -12,7 +13,18 @@ const CATEGORIES = [
 
 export default function NewPostPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login?callbackUrl=/post/new");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return <div className="text-center py-20 text-gray-400">로딩 중...</div>;
+  }
   const [isAnonymous, setIsAnonymous] = useState(true);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

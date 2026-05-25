@@ -36,7 +36,7 @@ export default function JjamCard({ user, compact = false }: JjamCardProps) {
             <p className="text-xs text-amber-600">{getBadge(user.yearsOfExp)}</p>
           )}
         </div>
-        {user.verified && <ShieldCheck size={14} className="text-blue-500 flex-shrink-0" />}
+        {user.verified && <ShieldCheck size={14} className="text-primary-500 flex-shrink-0" />}
       </div>
     );
   }
@@ -66,7 +66,7 @@ export default function JjamCard({ user, compact = false }: JjamCardProps) {
         <div>
           <div className="flex items-center gap-1.5">
             <p className="font-black text-gray-900 text-lg">{user.nickname}</p>
-            {user.verified && <ShieldCheck size={16} className="text-blue-500" />}
+            {user.verified && <ShieldCheck size={16} className="text-primary-500" />}
           </div>
           {user.yearsOfExp && (
             <p className="text-amber-700 font-bold text-sm">{getBadge(user.yearsOfExp)}</p>
@@ -77,7 +77,7 @@ export default function JjamCard({ user, compact = false }: JjamCardProps) {
       {/* 통계 */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-white rounded-xl p-3 text-center">
-          <p className="text-2xl font-black text-blue-700">{user.yearsOfExp ?? "?"}</p>
+          <p className="text-2xl font-black text-primary-600">{user.yearsOfExp ?? "?"}</p>
           <p className="text-xs text-gray-500">경력 (년)</p>
         </div>
         <div className="bg-white rounded-xl p-3 text-center">
@@ -99,7 +99,7 @@ export default function JjamCard({ user, compact = false }: JjamCardProps) {
 
       {/* 검증 배지 */}
       {user.verified && (
-        <p className="text-xs text-blue-600 mt-3 flex items-center gap-1">
+        <p className="text-xs text-primary-600 mt-3 flex items-center gap-1">
           <ShieldCheck size={12} /> 건강보험공단 경력 인증 완료
         </p>
       )}

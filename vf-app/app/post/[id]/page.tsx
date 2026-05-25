@@ -1,4 +1,5 @@
 import { getPostById } from "@/actions/post";
+import { getUserRespectedCommentIds } from "@/actions/comment";
 import { notFound } from "next/navigation";
 import CommentSection from "@/components/post/CommentSection";
 import { CATEGORY_LABELS, CATEGORY_COLORS, getVeteranBadge } from "@/types";
@@ -13,6 +14,9 @@ interface PostPageProps {
 export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostById(params.id);
   if (!post) return notFound();
+
+  const commentIds = post.comments.map((c) => c.id);
+  const userRespectedIds = await getUserRespectedCommentIds(commentIds);
 
   const isAnonymous = post.isAnonymous;
   const author = post.author;
@@ -59,7 +63,7 @@ export default async function PostPage({ params }: PostPageProps) {
       )}
 
       {/* 댓글 섹션 */}
-      <CommentSection postId={post.id} comments={post.comments} />
+      <CommentSection postId={post.id} comments={post.comments} userRespectedIds={userRespectedIds} />
     </div>
   );
 }

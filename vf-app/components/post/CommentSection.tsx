@@ -26,11 +26,13 @@ interface Comment {
 interface CommentSectionProps {
   postId: string;
   comments: Comment[];
+  userRespectedIds?: string[];
 }
 
-export default function CommentSection({ postId, comments: initialComments }: CommentSectionProps) {
+export default function CommentSection({ postId, comments: initialComments, userRespectedIds = [] }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState(initialComments);
+  const [respectedIds, setRespectedIds] = useState<Set<string>>(() => new Set(userRespectedIds));
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -50,14 +52,32 @@ export default function CommentSection({ postId, comments: initialComments }: Co
   }
 
   function handleRespect(commentId: string) {
+    if (!session) {
+      alert("리스펙트는 로그인 후 가능해요.");
+      return;
+    }
     startTransition(async () => {
       try {
-        await toggleRespect(commentId);
-        setComments((prev) =>
-          prev.map((c) =>
-            c.id === commentId ? { ...c, respects: c.respects + 1 } : c
-          )
-        );
+        const result = await toggleRespect(commentId);
+        if (result.action === "added") {
+          setRespectedIds((prev) => new Set([...prev, commentId]));
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === commentId ? { ...c, respects: c.respects + 1 } : c
+            )
+          );
+        } else {
+          setRespectedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(commentId);
+            return next;
+          });
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === commentId ? { ...c, respects: Math.max(0, c.respects - 1) } : c
+            )
+          );
+        }
       } catch (err) {
         alert((err as Error).message);
       }
@@ -67,25 +87,25 @@ export default function CommentSection({ postId, comments: initialComments }: Co
   return (
     <div className="space-y-3">
       <h2 className="font-bold text-gray-900">
-        답변 <span className="text-blue-700">{comments.length}</span>
+        답변 <span className="text-primary-600">{comments.length}</span>
       </h2>
 
       {/* 댓글 목록 */}
       {comments.map((comment) => (
         <div
           key={comment.id}
-          className={`card ${comment.isAI ? "border-blue-200 bg-blue-50" : ""}`}
+          className={`card ${comment.isAI ? "border-primary-200 bg-primary-50" : ""}`}
         >
           {/* 작성자 정보 */}
           <div className="flex items-center gap-2 mb-2">
             {comment.isAI ? (
               <>
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
                   <Bot size={16} className="text-white" />
                 </div>
                 <div>
-                  <span className="font-semibold text-sm text-blue-800">이 과장님 AI</span>
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">AI 멘토</span>
+                  <span className="font-semibold text-sm text-primary-800">이 과장님 AI</span>
+                  <span className="ml-2 text-xs bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">AI 멘토</span>
                 </div>
               </>
             ) : (
@@ -110,7 +130,7 @@ export default function CommentSection({ postId, comments: initialComments }: Co
                       </span>
                     )}
                     {comment.author.verified && (
-                      <ShieldCheck size={13} className="text-blue-500" />
+                      <ShieldCheck size={13} className="text-primary-500" />
                     )}
                   </div>
                 </div>
@@ -126,17 +146,18 @@ export default function CommentSection({ postId, comments: initialComments }: Co
           <div className="mt-3 flex items-center">
             <button
               onClick={() => handleRespect(comment.id)}
-              disabled={isPending || !session || comment.isAI}
+              disabled={isPending || comment.isAI}
               className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
                 comment.isAI
                   ? "text-gray-300 cursor-default"
-                  : comment.respects > 0
+                  : respectedIds.has(comment.id)
                   ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
                   : "bg-gray-100 text-gray-500 hover:bg-amber-50 hover:text-amber-600"
               }`}
             >
-              <ThumbsUp size={13} />
-              리스펙트 {comment.respects > 0 && <strong>{comment.respects}</strong>}
+              <ThumbsUp size={13} className={respectedIds.has(comment.id) ? "fill-amber-500 text-amber-500" : ""} />
+              {respectedIds.has(comment.id) ? "리스펙트함" : "리스펙트"}
+              {comment.respects > 0 && <strong>{comment.respects}</strong>}
             </button>
           </div>
         </div>
@@ -153,7 +174,7 @@ export default function CommentSection({ postId, comments: initialComments }: Co
             onChange={(e) => setContent(e.target.value)}
             rows={4}
             placeholder="진심 어린 조언을 남겨주세요..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
             required
           />
           <button type="submit" disabled={isPending} className="btn-primary">

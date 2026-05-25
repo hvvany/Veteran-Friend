@@ -13,7 +13,7 @@ export default function Navbar() {
     <header className="bg-white border-b sticky top-0 z-50">
       <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* 로고 */}
-        <Link href="/" className="font-black text-blue-800 text-xl tracking-tight">
+        <Link href="/" className="font-black text-primary-700 text-xl tracking-tight">
           베프<span className="text-amber-500">.</span>
         </Link>
 
@@ -25,7 +25,7 @@ export default function Navbar() {
 
           {session ? (
             <div className="flex items-center gap-2 ml-2">
-              <Link href="/profile" className={`p-2 rounded-lg transition-colors ${pathname === "/profile" ? "bg-blue-100 text-blue-700" : "text-gray-500 hover:text-gray-700"}`}>
+              <Link href="/profile" className={`p-2 rounded-lg transition-colors ${pathname === "/profile" ? "bg-primary-100 text-primary-700" : "text-gray-500 hover:text-gray-700"}`}>
                 <User size={18} />
               </Link>
               <button onClick={() => signOut()} className="text-xs text-gray-400 hover:text-gray-600">
@@ -35,7 +35,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="ml-2 bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-800 transition-colors"
+              className="ml-2 bg-primary-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors"
             >
               로그인
             </Link>
@@ -51,7 +51,7 @@ function NavItem({ href, icon, label, active }: { href: string; icon: React.Reac
     <Link
       href={href}
       className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${
-        active ? "text-blue-700 bg-blue-50" : "text-gray-500 hover:text-gray-700"
+        active ? "text-primary-600 bg-primary-50" : "text-gray-500 hover:text-gray-700"
       }`}
     >
       {icon}

@@ -6,7 +6,7 @@
 
 :root {
   --foreground-rgb: 17, 24, 39;
-  --background-rgb: 249, 250, 251;
+  --background-rgb: 226, 232, 240; /* Electric Silver #E2E8F0 */
 }
 
 body {

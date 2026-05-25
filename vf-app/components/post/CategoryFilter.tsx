@@ -26,8 +26,8 @@ export default function CategoryFilter({ currentCategory }: CategoryFilterProps)
             href={href}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               isActive
-                ? "bg-blue-700 text-white"
-                : "bg-white text-gray-600 border border-gray-200 hover:border-blue-400"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-gray-600 border border-gray-200 hover:border-primary-400"
             }`}
           >
             {cat.label}
