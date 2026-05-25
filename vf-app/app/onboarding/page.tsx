@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { setUserRole, updateProfile, applyVeteranVerification } from "@/actions/user";
 
 type Step = "role" | "nickname" | "veteran-verify";
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const { data: session } = useSession();
   const [step, setStep] = useState<Step>("role");
   const [selectedRole, setSelectedRole] = useState<"JUNIOR" | "VETERAN">("JUNIOR");
@@ -34,7 +32,8 @@ export default function OnboardingPage() {
         if (selectedRole === "VETERAN") {
           setStep("veteran-verify");
         } else {
-          router.push("/");
+          // router.push 대신 window.location 으로 풀 리로드 → 세션 캐시 초기화
+          window.location.href = "/";
         }
       } catch (err) {
         alert((err as Error).message);
@@ -52,7 +51,8 @@ export default function OnboardingPage() {
     startTransition(async () => {
       try {
         await applyVeteranVerification({ name, birthDate, totalYears });
-        router.push("/");
+        // 풀 리로드로 세션 캐시 초기화 → isNew = false 반영
+        window.location.href = "/";
       } catch (err) {
         alert((err as Error).message);
       }
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={() => { window.location.href = "/"; }}
                 className="w-full text-sm text-gray-400 hover:text-gray-600"
               >
                 나중에 인증하기

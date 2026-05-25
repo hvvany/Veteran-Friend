@@ -67,9 +67,10 @@ export const authOptions: NextAuthOptions = {
           session.user.respectPoints = dbUser.respectPoints;
           session.user.name = dbUser.name ?? session.user.name;
           session.user.image = dbUser.image ?? session.user.image;
-          // 가입 후 1분 이내이면 신규 유저로 판단 → 온보딩 유도
+          // createdAt ≈ updatedAt (2초 이내) 이면 신규 유저 → 온보딩 필요
+          // updateProfile 호출 시 updatedAt이 바뀌어 isNew = false 가 됨
           const isNew =
-            new Date(dbUser.createdAt).getTime() > Date.now() - 60 * 1000;
+            Math.abs(dbUser.updatedAt.getTime() - dbUser.createdAt.getTime()) < 2000;
           session.user.isNew = isNew;
         }
       }
