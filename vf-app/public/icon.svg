@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- 앱 아이콘 배경 (연회색 라운드 사각형) -->
-  <rect width="200" height="200" rx="44" ry="44" fill="#F4F4F5"/>
+  <!-- 연회색 라운드 배경 -->
+  <rect width="200" height="200" rx="44" ry="44" fill="#EBEBEA"/>
 
-  <!-- 금색 비대칭 V: 왼쪽 팔이 더 높게 (은퇴 후에도 더 높이 날아오를 제2의 인생 표현) -->
+  <!-- 금색 비대칭 V (왼쪽 팔이 더 높게 → 제2의 인생 표현) -->
   <polyline
-    points="30,16 97,166 170,72"
+    points="26,13 96,170 173,64"
     fill="none"
     stroke="#FBBF24"
     stroke-width="36"
@@ -12,11 +12,13 @@
     stroke-linejoin="round"
   />
 
-  <!-- 코발트블루 F 레터폼 (금색 V 위에 겹쳐서 표현) -->
-  <!-- 세로 획 -->
-  <rect x="88" y="22" width="23" height="155" fill="#2E5BFF" rx="4"/>
-  <!-- 상단 가로 획 -->
-  <rect x="88" y="22" width="72" height="23" fill="#2E5BFF" rx="4"/>
-  <!-- 중단 가로 획 -->
-  <rect x="88" y="90" width="55" height="21" fill="#2E5BFF" rx="3"/>
+  <!-- 코발트블루 F - 28° 반시계 기울임 (누워있는 F) -->
+  <g transform="rotate(-28, 100, 100)">
+    <!-- 세로 획 -->
+    <rect x="84" y="28" width="24" height="138" fill="#2E5BFF" rx="4"/>
+    <!-- 상단 가로 획 -->
+    <rect x="84" y="28" width="68" height="24" fill="#2E5BFF" rx="4"/>
+    <!-- 중단 가로 획 -->
+    <rect x="84" y="92" width="52" height="22" fill="#2E5BFF" rx="3"/>
+  </g>
 </svg>
