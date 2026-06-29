@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { createComment, toggleRespect } from "@/actions/comment";
 import { formatRelativeTime } from "@/lib/utils";
@@ -35,6 +35,25 @@ export default function CommentSection({ postId, comments: initialComments, user
   const [respectedIds, setRespectedIds] = useState<Set<string>>(() => new Set(userRespectedIds));
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  // 리스펙트 디바운스 관리 (댓글별 타이머)
+  const respectTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // 서버와 동기화된 최신 상태 (디바운스 종료 시 비교용)
+  const syncedRespectedIds = useRef<Set<string>>(new Set(userRespectedIds));
+  // 최신 respectedIds를 setTimeout closure에서 읽기 위한 ref
+  const respectedIdsRef = useRef(respectedIds);
+  useEffect(() => {
+    respectedIdsRef.current = respectedIds;
+  }, [respectedIds]);
+
+  // 언마운트 시 타이머 정리
+  useEffect(() => {
+    const timers = respectTimers.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +105,7 @@ export default function CommentSection({ postId, comments: initialComments, user
 
     const wasRespected = respectedIds.has(commentId);
 
-    // Optimistic Update: 먼저 UI 업데이트
+    // Optimistic Update: 즉시 UI 반영
     if (wasRespected) {
       setRespectedIds((prev) => {
         const next = new Set(prev);
@@ -107,39 +126,46 @@ export default function CommentSection({ postId, comments: initialComments, user
       );
     }
 
-    // 서버 요청 (백그라운드)
-    startTransition(async () => {
+    // 디바운스: 기존 타이머 취소 후 재설정 (빠른 연타 시 마지막 상태만 서버에 반영)
+    const existingTimer = respectTimers.current.get(commentId);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    const timer = setTimeout(async () => {
+      respectTimers.current.delete(commentId);
+
+      const finalRespected = respectedIdsRef.current.has(commentId);
+      const lastSynced = syncedRespectedIds.current.has(commentId);
+
+      // 서버 상태와 동일하면 서버 호출 불필요 (짝수번 클릭으로 원상복구된 경우)
+      if (finalRespected === lastSynced) return;
+
       try {
-        const result = await toggleRespect(commentId);
-        // 서버 응답이 예상과 다르면 다시 동기화 (드문 경우)
-        const serverAdded = result.action === "added";
-        if (serverAdded === wasRespected) {
-          // 이미 Optimistic으로 반영했으므로 추가 작업 불필요
+        await toggleRespect(commentId);
+        // 서버 동기화 상태 업데이트
+        if (finalRespected) {
+          syncedRespectedIds.current.add(commentId);
+        } else {
+          syncedRespectedIds.current.delete(commentId);
         }
       } catch (err) {
-        // 실패 시 롤백
-        if (wasRespected) {
-          setRespectedIds((prev) => new Set([...prev, commentId]));
-          setComments((prev) =>
-            prev.map((c) =>
-              c.id === commentId ? { ...c, respects: c.respects + 1 } : c
-            )
-          );
-        } else {
-          setRespectedIds((prev) => {
-            const next = new Set(prev);
-            next.delete(commentId);
-            return next;
-          });
-          setComments((prev) =>
-            prev.map((c) =>
-              c.id === commentId ? { ...c, respects: Math.max(0, c.respects - 1) } : c
-            )
-          );
-        }
-        alert((err as Error).message);
+        // 실패 시 서버 상태로 롤백 (UI도 맞춤)
+        const delta = (lastSynced ? 1 : 0) - (finalRespected ? 1 : 0);
+        setRespectedIds((prev) => {
+          const next = new Set(prev);
+          if (lastSynced) next.add(commentId);
+          else next.delete(commentId);
+          return next;
+        });
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId ? { ...c, respects: Math.max(0, c.respects + delta) } : c
+          )
+        );
+        console.error("리스펙트 동기화 실패:", err);
       }
-    });
+    }, 600);
+
+    respectTimers.current.set(commentId, timer);
   }
 
   return (
@@ -204,7 +230,7 @@ export default function CommentSection({ postId, comments: initialComments, user
           <div className="mt-3 flex items-center">
             <button
               onClick={() => handleRespect(comment.id)}
-              disabled={isPending || comment.isAI}
+              disabled={comment.isAI}
               className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
                 comment.isAI
                   ? "text-gray-300 cursor-default"
