@@ -24,8 +24,8 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   return (
-    <Link href={`/post/${post.id}`}>
-      <div className="card hover:shadow-md hover:border-primary-100 transition-all cursor-pointer">
+    <Link href={`/post/${post.id}`} prefetch>
+      <div className="card hover:shadow-md hover:border-primary-100 active:bg-primary-50/50 transition-all cursor-pointer">
         {/* 상단: 카테고리 + 날짜 */}
         <div className="flex items-center gap-2 mb-2">
           <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${CATEGORY_COLORS[post.category]}`}>
