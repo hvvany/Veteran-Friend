@@ -12,7 +12,7 @@ interface ProfileData {
 
 export default function ProfileClient({ profile }: { profile: ProfileData }) {
   const [isPending, startTransition] = useTransition();
-  const [success, setSuccess] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [expertiseInput, setExpertiseInput] = useState(profile.expertise.join(", "));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -25,16 +25,29 @@ export default function ProfileClient({ profile }: { profile: ProfileData }) {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    // Optimistic Update: 즉시 저장 완료 표시
+    setStatus("success");
+
     startTransition(async () => {
       try {
         await updateProfile({ nickname, bio, expertise });
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 2000);
+        // 성공 - 이미 success 상태
+        setTimeout(() => setStatus("idle"), 1500);
       } catch (err) {
+        // 실패 시 롤백
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 2000);
         alert((err as Error).message);
       }
     });
   }
+
+  const buttonText = {
+    idle: "저장하기",
+    saving: "저장 중...",
+    success: "✅ 저장 완료!",
+    error: "❌ 저장 실패",
+  }[status];
 
   return (
     <div className="card space-y-4">
@@ -76,7 +89,7 @@ export default function ProfileClient({ profile }: { profile: ProfileData }) {
         )}
 
         <button type="submit" disabled={isPending} className="btn-primary w-full">
-          {isPending ? "저장 중..." : success ? "✅ 저장 완료!" : "저장하기"}
+          {buttonText}
         </button>
       </form>
     </div>

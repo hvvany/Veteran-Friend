@@ -87,7 +87,11 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
     newUser: "/onboarding",
   },
-  session: { strategy: "database" },
+  session: {
+    strategy: "database",
+    maxAge: 60 * 60 * 24, // 1일 (24시간)
+    updateAge: 60 * 60,   // 1시간마다 세션 갱신
+  },
 };
 
 declare module "next-auth" {

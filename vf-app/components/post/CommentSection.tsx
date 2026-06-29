@@ -38,14 +38,41 @@ export default function CommentSection({ postId, comments: initialComments, user
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || !session?.user) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticComment: Comment = {
+      id: tempId,
+      content: content.trim(),
+      isAI: false,
+      respects: 0,
+      createdAt: new Date(),
+      author: {
+        id: session.user.id,
+        nickname: session.user.nickname ?? session.user.name ?? "사용자",
+        role: session.user.role ?? "JUNIOR",
+        verified: session.user.verified ?? false,
+        yearsOfExp: session.user.yearsOfExp ?? null,
+        image: session.user.image ?? null,
+      },
+    };
+
+    // Optimistic Update: 먼저 UI에 추가
+    setComments((prev) => [...prev, optimisticComment]);
+    const savedContent = content;
+    setContent("");
 
     startTransition(async () => {
       try {
-        const newComment = await createComment(postId, content);
-        setComments((prev) => [...prev, newComment as Comment]);
-        setContent("");
+        const newComment = await createComment(postId, savedContent);
+        // 성공 시 임시 댓글을 실제 댓글로 교체
+        setComments((prev) =>
+          prev.map((c) => (c.id === tempId ? (newComment as Comment) : c))
+        );
       } catch (err) {
+        // 실패 시 롤백
+        setComments((prev) => prev.filter((c) => c.id !== tempId));
+        setContent(savedContent);
         alert((err as Error).message);
       }
     });
@@ -56,10 +83,42 @@ export default function CommentSection({ postId, comments: initialComments, user
       alert("리스펙트는 로그인 후 가능해요.");
       return;
     }
+
+    const wasRespected = respectedIds.has(commentId);
+
+    // Optimistic Update: 먼저 UI 업데이트
+    if (wasRespected) {
+      setRespectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      });
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, respects: Math.max(0, c.respects - 1) } : c
+        )
+      );
+    } else {
+      setRespectedIds((prev) => new Set([...prev, commentId]));
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, respects: c.respects + 1 } : c
+        )
+      );
+    }
+
+    // 서버 요청 (백그라운드)
     startTransition(async () => {
       try {
         const result = await toggleRespect(commentId);
-        if (result.action === "added") {
+        // 서버 응답이 예상과 다르면 다시 동기화 (드문 경우)
+        const serverAdded = result.action === "added";
+        if (serverAdded === wasRespected) {
+          // 이미 Optimistic으로 반영했으므로 추가 작업 불필요
+        }
+      } catch (err) {
+        // 실패 시 롤백
+        if (wasRespected) {
           setRespectedIds((prev) => new Set([...prev, commentId]));
           setComments((prev) =>
             prev.map((c) =>
@@ -78,7 +137,6 @@ export default function CommentSection({ postId, comments: initialComments, user
             )
           );
         }
-      } catch (err) {
         alert((err as Error).message);
       }
     });

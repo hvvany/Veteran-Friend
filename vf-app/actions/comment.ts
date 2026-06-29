@@ -35,22 +35,29 @@ export async function toggleRespect(commentId: string) {
   });
 
   if (existing) {
-    // 리스펙트 취소
-    await prisma.respect.delete({ where: { id: existing.id } });
-    await prisma.comment.update({ where: { id: commentId }, data: { respects: { decrement: 1 } } });
+    // 리스펙트 취소 - 병렬 실행
+    await Promise.all([
+      prisma.respect.delete({ where: { id: existing.id } }),
+      prisma.comment.update({ where: { id: commentId }, data: { respects: { decrement: 1 } } }),
+    ]);
     return { action: "removed" };
   } else {
-    // 리스펙트 추가
-    await prisma.respect.create({ data: { userId: session.user.id, commentId } });
-    await prisma.comment.update({ where: { id: commentId }, data: { respects: { increment: 1 } } });
+    // 리스펙트 추가 - 병렬 실행 + 작성자 포인트 증가는 fire-and-forget
+    const [, comment] = await Promise.all([
+      prisma.respect.create({ data: { userId: session.user.id, commentId } }),
+      prisma.comment.update({
+        where: { id: commentId },
+        data: { respects: { increment: 1 } },
+        select: { authorId: true },
+      }),
+    ]);
 
-    // 댓글 작성자의 리스펙트 포인트도 증가
-    const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+    // 댓글 작성자의 리스펙트 포인트 증가 - fire-and-forget (백그라운드)
     if (comment) {
-      await prisma.user.update({
+      prisma.user.update({
         where: { id: comment.authorId },
         data: { respectPoints: { increment: 1 } },
-      });
+      }).catch(() => {});
     }
     return { action: "added" };
   }
