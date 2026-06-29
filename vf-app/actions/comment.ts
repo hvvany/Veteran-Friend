@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { sendPushToUser } from "@/lib/push";
 
 export async function createComment(postId: string, content: string) {
   const session = await getServerSession(authOptions);
@@ -58,6 +59,16 @@ export async function toggleRespect(commentId: string) {
         where: { id: comment.authorId },
         data: { respectPoints: { increment: 1 } },
       }).catch(() => {});
+
+      // 나를 제외한 다른 사람이 리스펙트를 단 경우만 알림
+      if (comment.authorId !== session.user.id) {
+        sendPushToUser(comment.authorId, {
+          title: "항성된 리스펙트! 👏",
+          body: `${session.user.nickname ?? session.user.name ?? "누군가"}님이 당신의 답변에 리스펙트를 보냈어요!`,
+          url: `/post/${(await prisma.comment.findUnique({ where: { id: commentId }, select: { postId: true } }))?.postId ?? ""}`,
+          tag: `respect-${commentId}`,
+        }).catch(() => {});
+      }
     }
     return { action: "added" };
   }

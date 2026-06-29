@@ -42,6 +42,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   respects      Respect[] // 내가 준 리스펙트
+  pushSubs      PushSubscription[]
 }
 
 model Post {
@@ -117,4 +118,14 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

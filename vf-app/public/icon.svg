@@ -1,22 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- 앱 아이콘 배경 (연한 베이지/그레이 라운드 사각형) -->
-  <rect width="200" height="200" rx="44" ry="44" fill="#D9D8D5"/>
+  <!-- 배경: 연한 회색 라운드 사각형 -->
+  <rect width="200" height="200" rx="44" ry="44" fill="#E5E4E0"/>
 
-  <!-- 주황색 비대칭 V: 왼쪽 팔이 더 높게 (은퇴 후에도 더 높이 날아오를 제2의 인생 표현) -->
-  <polyline
-    points="30,16 97,166 170,72"
-    fill="none"
-    stroke="#E88534"
-    stroke-width="36"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+  <!-- 주황색 V (채워진 폴리곤) - F 뒤에 위치 -->
+  <!-- 왼팔: (12,15)~(48,15) 상단, 아래로 수렴 / 오른팔: (138,15)~(174,15) 상단, 아래로 수렴 -->
+  <polygon
+    points="12,15 48,15 93,152 138,15 174,15 107,178 79,178"
+    fill="#E88A28"
   />
 
-  <!-- 코발트블루 F 레터폼 (주황색 V 위에 겹쳐서 표현) -->
+  <!-- 파란 F (V 위에 오버레이) -->
   <!-- 세로 획 -->
-  <rect x="88" y="22" width="23" height="155" fill="#2348A8" rx="4"/>
-  <!-- 상단 가로 획 -->
-  <rect x="88" y="22" width="72" height="23" fill="#2348A8" rx="4"/>
+  <rect x="68" y="13" width="30" height="166" fill="#1E3BAA" rx="4"/>
+  <!-- 상단 가로 획 (V 오른팔 대부분 커버) -->
+  <rect x="68" y="13" width="108" height="33" fill="#1E3BAA" rx="4"/>
   <!-- 중단 가로 획 -->
-  <rect x="88" y="90" width="55" height="21" fill="#2348A8" rx="3"/>
+  <rect x="68" y="87" width="80" height="27" fill="#1E3BAA" rx="4"/>
 </svg>

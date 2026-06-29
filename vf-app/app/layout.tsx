@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import SessionProvider from "@/components/auth/SessionProvider";
 import Navbar from "@/components/layout/Navbar";
 import OnboardingGuard from "@/components/auth/OnboardingGuard";
+import ServiceWorkerRegistrar from "@/components/push/ServiceWorkerRegistrar";
 
 export const metadata: Metadata = {
   title: "베프 (VF) - Veteran Friend",
@@ -37,6 +38,7 @@ export default async function RootLayout({
     <html lang="ko">
       <body>
         <SessionProvider session={session}>
+          <ServiceWorkerRegistrar />
           <div className="min-h-screen bg-gray-50">
             <OnboardingGuard />
             <Navbar />

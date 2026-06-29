@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { Category } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getManagerLeeResponse } from "@/lib/gemini";
+import { sendPushToAll } from "@/lib/push";
 
 export async function createPost(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -33,6 +34,15 @@ export async function createPost(formData: FormData) {
   // 베테랑 응답이 없을 때를 대비해 AI(이 과장님) 자동 응답 예약
   // 실제 서비스에서는 큐 시스템으로 처리 (ex. 30분 후 베테랑 댓글 없으면 AI 응답)
   scheduleManagerLeeResponse(post.id, content, category);
+
+  // 새 글 작성 알림 - fire-and-forget (전체 구독자에게)
+  const authorName = session.user.nickname ?? session.user.name ?? "누군가";
+  sendPushToAll({
+    title: "새 글이 올라왔어요! 📝",
+    body: `${authorName}: ${title}`,
+    url: `/post/${post.id}`,
+    tag: `new-post-${post.id}`,
+  }).catch(() => {});
 
   revalidatePath("/feed");
   return { postId: post.id };

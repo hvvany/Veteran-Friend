@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { User, Home, Trophy, PenSquare } from "lucide-react";
+import PushNotificationButton from "@/components/push/PushNotificationButton";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -25,6 +26,7 @@ export default function Navbar() {
 
           {session ? (
             <div className="flex items-center gap-2 ml-2">
+              <PushNotificationButton />
               <Link href="/profile" className={`p-2 rounded-lg transition-colors ${pathname === "/profile" ? "bg-primary-100 text-primary-700" : "text-gray-500 hover:text-gray-700"}`}>
                 <User size={18} />
               </Link>
