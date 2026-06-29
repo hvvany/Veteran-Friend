@@ -3,9 +3,19 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
+const ERROR_MESSAGES: Record<string, string> = {
+  OAuthAccountNotLinked: "이미 다른 방식으로 가입된 이메일입니다. 먼저 로그인했던 방식(구글/카카오)으로 다시 시도해주세요.",
+  OAuthCallback: "소셜 로그인 중 오류가 발생했어요. 다시 시도해주세요.",
+  OAuthSignin: "소셜 로그인 요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.",
+  AccessDenied: "로그인이 거부되었어요. 동의 항목을 확인해주세요.",
+  default: "로그인 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.",
+};
+
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const error = searchParams.get("error");
+  const errorMessage = error ? ERROR_MESSAGES[error] ?? ERROR_MESSAGES.default : null;
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center">
@@ -22,6 +32,13 @@ export default function LoginPage() {
 
         <div className="border-t border-b py-6 space-y-3">
           <p className="text-xs text-gray-400 mb-4">소셜 계정으로 간편 로그인</p>
+
+          {/* 에러 메시지 */}
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg px-3 py-2 mb-3 text-left">
+              {errorMessage}
+            </div>
+          )}
 
           {/* 카카오 로그인 */}
           <button
