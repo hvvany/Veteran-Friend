@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "5060 베테랑의 짬에서 나오는 인생 조언 커뮤니티",
     start_url: "/",
     display: "standalone",
-    background_color: "#E2E8F0",
-    theme_color: "#2E5BFF",
+    background_color: "#D9D8D5",
+    theme_color: "#2348A8",
     icons: [
       {
         src: "/icon.svg",
